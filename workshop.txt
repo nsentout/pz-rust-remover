@@ -1,0 +1,6 @@
+version=1
+id=
+title=pz playground
+description=workshop test
+tags=
+visibility=1
