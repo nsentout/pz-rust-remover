@@ -1,0 +1,9 @@
+{
+    "$schema": "https://raw.githubusercontent.com/PZ-Wiki-Modding/ZedScripts-LSP/refs/heads/main/schema/zedscripts.json",
+    "dataset": {
+        "latest": true
+    },
+    "libraries": [
+        "D:/SteamLibrary/steamapps/common/ProjectZomboid/media"
+    ]
+}
