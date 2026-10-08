@@ -1,6 +1,6 @@
 version=1
-id=
+id=3815865652
 title=pz playground
 description=workshop test
-tags=
-visibility=1
+tags=Build 42
+visibility=friendsOnly
