@@ -5,8 +5,14 @@ RustRemover.COMMAND_REMOVE_RUST = "removeRust"
 RustRemover.MAX_DISTANCE = 5.0
 RustRemover.FULL_EPSILON = 0.01
 
-RustRemover.CLEANING_LIQUID_TYPES = {
+RustRemover.CLEANING_LIQUID_FLUID_TYPES = {
+    "CleaningLiquid",
+    "Bleach",
+}
+
+RustRemover.CLEANING_LIQUID_ITEM_TYPES = {
     "Base.CleaningLiquid2",
+    "Base.Bleach",
 }
 
 RustRemover.BUCKET_TYPES = {
@@ -69,29 +75,17 @@ end
 function RustRemover.isFullCleaningLiquid(item)
     if not item then return false end
 
-    -- Pass 1: it must be the vanilla B42 Cleaning Liquid bottle.
-    if item:getFullType() ~= "Base.CleaningLiquid2" then return false end
+    if not RustRemover.isItemInTypes(item, RustRemover.CLEANING_LIQUID_ITEM_TYPES) then return false end
 
-    local fluid = getFluidContainerSafe(item)
+    local fluidContainer = getFluidContainerSafe(item)
+    if not fluidContainer then return false end
+
+    local fluid = fluidContainer:getPrimaryFluid()
     if not fluid then return false end
-
-    -- Pass 2: verify that the bottle actually contains Cleaning Liquid.
-    local primary = fluid:getPrimaryFluid()
-    if not primary then return false end
-    if primary:getFluidTypeString() ~= "CleaningLiquid" then return false end
-
-    -- Reject mixed contents.
-    if fluid.isMixture and fluid:isMixture() then return false end
-
-    -- Require the standard bottle to be exactly full: 500 / 500 mL.
-    local cap = fluid:getCapacity()
-    local amt = fluid:getAmount()
-    if not cap or not amt then return false end
-
-    local target = 0.5
-    local epsilon = RustRemover.FULL_EPSILON
-    if math.abs(cap - target) > epsilon then return false end
-    return amt >= (target - epsilon)
+    if not RustRemover.isCleaningFluid(fluid:getFluidTypeString()) then return false end
+    if fluidContainer.isMixture and fluidContainer:isMixture() then return false end
+    
+    return fluidContainer:isFull()
 end
 
 function RustRemover.isCleaningCloth(item)
@@ -99,6 +93,23 @@ function RustRemover.isCleaningCloth(item)
     local ft = item:getFullType()
     for _, wanted in ipairs(RustRemover.CLOTH_TYPES) do
         if ft == wanted then return true end
+    end
+    return false
+end
+
+function RustRemover.isCleaningFluid(fluid)
+    if not fluid then return false end
+    for _, wanted in ipairs(RustRemover.CLEANING_LIQUID_FLUID_TYPES) do
+        if fluid == wanted then return true end
+    end
+    return false
+end
+
+function RustRemover.isItemInTypes(item, types)
+    if not item then return false end
+    local type = item:getFullType()
+    for _, wanted in ipairs(types) do
+        if type == wanted then return true end
     end
     return false
 end
@@ -119,7 +130,7 @@ end
 function RustRemover.findSupplies(playerObj)
     if not playerObj or not playerObj:getInventory() then return nil,nil,nil end
     local inv = playerObj:getInventory()
-    local liquid = findFirst(inv, RustRemover.CLEANING_LIQUID_TYPES, RustRemover.isFullCleaningLiquid)
+    local liquid = findFirst(inv, RustRemover.CLEANING_LIQUID_ITEM_TYPES, RustRemover.isFullCleaningLiquid)
     local bucket = findFirst(inv, RustRemover.BUCKET_TYPES, RustRemover.isWaterBucket)
     local cloth = findFirst(inv, RustRemover.CLOTH_TYPES, RustRemover.isCleaningCloth)
     return liquid, bucket, cloth
