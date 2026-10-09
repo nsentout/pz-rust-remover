@@ -3,7 +3,7 @@ RustRemover = RustRemover or {}
 RustRemover.MODULE = "RustRemover"
 RustRemover.COMMAND_REMOVE_RUST = "removeRust"
 RustRemover.MAX_DISTANCE = 5.0
-RustRemover.FULL_EPSILON = 0.01
+RustRemover.FLOAT_EPSILON = 0.00001
 
 RustRemover.CLEANING_LIQUID_FLUID_TYPES = {
     "CleaningLiquid",
