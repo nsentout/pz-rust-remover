@@ -34,16 +34,14 @@ local function getFluidContainerSafe(item)
     return item:getFluidContainer()
 end
 
-function RustRemover.isItemFull(item)
+function RustRemover.isItemNotEmpty(item)
     if not item then return false end
     local fluid = getFluidContainerSafe(item)
     if fluid then
-        local cap = fluid:getCapacity()
-        local amt = fluid:getAmount()
-        return cap and cap > 0 and amt >= (cap - RustRemover.FULL_EPSILON)
+        return fluid:getAmount() > 0.0
     end
     if item.IsDrainable and item:IsDrainable() and item.getUsedDelta then
-        return item:getUsedDelta() >= (1.0 - RustRemover.FULL_EPSILON)
+        return item:getUsedDelta() > 0.0
     end
     return false
 end
@@ -66,13 +64,13 @@ function RustRemover.isWaterBucket(item)
         if primary:getFluidTypeString() ~= "Water" then return false end
         if fluid.isTainted and fluid:isTainted() then return false end
 
-        return RustRemover.isItemFull(item)
+        return RustRemover.isItemNotEmpty(item)
     end
 
     return false
 end
 
-function RustRemover.isFullCleaningLiquid(item)
+function RustRemover.isCleaningLiquidNotEmpty(item)
     if not item then return false end
 
     if not RustRemover.isItemInTypes(item, RustRemover.CLEANING_LIQUID_ITEM_TYPES) then return false end
@@ -84,8 +82,8 @@ function RustRemover.isFullCleaningLiquid(item)
     if not fluid then return false end
     if not RustRemover.isCleaningFluid(fluid:getFluidTypeString()) then return false end
     if fluidContainer.isMixture and fluidContainer:isMixture() then return false end
-    
-    return fluidContainer:isFull()
+
+    return not fluidContainer:isEmpty()
 end
 
 function RustRemover.isCleaningCloth(item)
@@ -130,10 +128,10 @@ end
 function RustRemover.findSupplies(playerObj)
     if not playerObj or not playerObj:getInventory() then return nil,nil,nil end
     local inv = playerObj:getInventory()
-    local liquid = findFirst(inv, RustRemover.CLEANING_LIQUID_ITEM_TYPES, RustRemover.isFullCleaningLiquid)
-    local bucket = findFirst(inv, RustRemover.BUCKET_TYPES, RustRemover.isWaterBucket)
+    local cleaningLiquid = findFirst(inv, RustRemover.CLEANING_LIQUID_ITEM_TYPES, RustRemover.isCleaningLiquidNotEmpty)
+    local waterContainer = findFirst(inv, RustRemover.BUCKET_TYPES, RustRemover.isWaterBucket)
     local cloth = findFirst(inv, RustRemover.CLOTH_TYPES, RustRemover.isCleaningCloth)
-    return liquid, bucket, cloth
+    return cleaningLiquid, waterContainer, cloth
 end
 
 function RustRemover.hasSupplies(playerObj)
