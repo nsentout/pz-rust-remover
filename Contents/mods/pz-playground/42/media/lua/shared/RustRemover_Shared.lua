@@ -54,8 +54,16 @@ end
 
 local function findFirstFluidContainerItem(inventory, predicate, fluids)
     for _, fluid in ipairs(fluids) do
-        local fluidContainerItem = inventory:getFirstFluidContainer(fluid:getFluidTypeString())
-        if fluidContainerItem and predicate(fluidContainerItem, fluid) then return fluidContainerItem end
+        local fluidContainers = inventory:getAllEvalRecurse(function(item)
+            if item:getFluidContainer() and predicate(item, fluid)  then
+                return true
+            end
+            return false
+        end)
+
+        if not fluidContainers:isEmpty() then
+            return fluidContainers:get(0)
+        end
     end
     return nil
 end
