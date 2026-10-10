@@ -9,11 +9,11 @@ end
 local function getFluidToRemove(item, rust)
     if not item then return 0.0 end
     if ComponentType and ComponentType.FluidContainer and item.hasComponent and item:hasComponent(ComponentType.FluidContainer) then
-        local fluid = item:getFluidContainer()
-        if not fluid then return false end
+        local fluidContainer = item:getFluidContainer()
+        if not fluidContainer then return false end
 
-        local fluidLiterToRemove = math.min(rust * fluid:getCapacity(), fluid:getAmount())
-        return fluidLiterToRemove / fluid:getCapacity()
+        local fluidLiterToRemove = math.min(rust * fluidContainer:getCapacity(), fluidContainer:getAmount())
+        return fluidLiterToRemove / fluidContainer:getCapacity()
     end
 
     return 0.0
@@ -22,10 +22,10 @@ end
 local function emptyFluid(item, fluidToRemove)
     if not item then return 0.0 end
     if ComponentType and ComponentType.FluidContainer and item.hasComponent and item:hasComponent(ComponentType.FluidContainer) then
-        local fluid = item:getFluidContainer()
-        if not fluid then return false end
+        local fluidContainer = item:getFluidContainer()
+        if not fluidContainer then return false end
         
-        fluid:removeFluid(fluidToRemove * fluid:getCapacity())
+        fluidContainer:removeFluid(fluidToRemove * fluidContainer:getCapacity())
 
         syncItem(item)
         return true
@@ -61,7 +61,7 @@ function RustRemover_Server.perform(playerObj, args)
 
     if not RustRemover.isCleaningFluidNotEmpty(cleaningFluidContainerItem)
         or not RustRemover.isWaterBucket(waterContainerItem)
-        or not RustRemover.isCleaningCloth(absorbentItem) then
+        or not RustRemover.isAbsorbent(absorbentItem) then
         print("[RustRemover] rejected: supplies changed before completion")
         return false
     end
