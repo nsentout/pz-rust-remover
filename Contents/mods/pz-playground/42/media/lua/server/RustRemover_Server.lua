@@ -10,6 +10,18 @@ local function isFluidContainer(item)
     return ComponentType and ComponentType.FluidContainer and item.hasComponent and item:hasComponent(ComponentType.FluidContainer)
 end
 
+local function getRemovableLiter(fluidContainer, neededLiterForFullClean, rust)
+    local removableLiter = 0.
+    local neededLiter = rust * neededLiterForFullClean
+    if fluidContainer:getAmount() < neededLiter then
+        removableLiter = fluidContainer:getAmount()
+    else
+        removableLiter = neededLiter
+    end
+
+    return removableLiter
+end
+
 function RustRemover_Server.perform(playerObj, args)
     if not playerObj or not args or not args.vehicle then return false end
     local vehicle = getVehicleById(tonumber(args.vehicle))
@@ -46,22 +58,11 @@ function RustRemover_Server.perform(playerObj, args)
     local cleangFluidContainer = cleaningFluidContainerItem:getFluidContainer()
     local waterContainer = waterContainerItem:getFluidContainer()
 
-    local cleaningFluidRemovableLiter = 0.0
-    local cleaningFluidNeededLiter = rust * RustRemover.CLEANING_FLUID_NEEDED_LITER
-    if cleangFluidContainer:getAmount() < cleaningFluidNeededLiter then
-        cleaningFluidRemovableLiter = cleangFluidContainer:getAmount()
-    else
-        cleaningFluidRemovableLiter = cleaningFluidNeededLiter
-    end
+    -- Get amount of fluid that can be emptied from each fluid container to remove a maximum of rust
+    local cleaningFluidRemovableLiter = getRemovableLiter(cleangFluidContainer, RustRemover.CLEANING_FLUID_NEEDED_LITER, rust)
+    local waterRemovableLiter = getRemovableLiter(waterContainer, RustRemover.WATER_NEEDED_LITER, rust)
 
-    local waterRemovableLiter = 0.0
-    local waterNeededLiter = rust * RustRemover.WATER_NEEDED_LITER
-    if waterContainer:getAmount() < waterNeededLiter then
-        waterRemovableLiter = waterContainer:getAmount()
-    else
-        waterRemovableLiter = waterNeededLiter
-    end
-
+    -- For both containers, limit the amount of fluid that can be emptied to the fluid container with the minimum amount of fluid that can be emptied
     local cleaningFluidQtyRemovable = cleaningFluidRemovableLiter / RustRemover.CLEANING_FLUID_NEEDED_LITER
     local waterQtyRemovable = waterRemovableLiter / RustRemover.WATER_NEEDED_LITER
 
@@ -73,12 +74,13 @@ function RustRemover_Server.perform(playerObj, args)
 
     local rustRemovableQty = waterRemovableLiter / RustRemover.WATER_NEEDED_LITER
 
-
+    -- Empty fluid containers
     cleangFluidContainer:removeFluid(cleaningFluidRemovableLiter)
     waterContainer:removeFluid(waterRemovableLiter)
     syncItem(cleangFluidContainer)
     syncItem(waterContainer)
 
+    -- Remove rust
     local oldRust = rust
     vehicle:setRust(vehicle:getRust() - rustRemovableQty)
     if vehicle:getRust() <= RustRemover.FLOAT_EPSILON then vehicle:setRust(0) end
