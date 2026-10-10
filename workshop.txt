@@ -1,6 +1,6 @@
 version=1
-id=
-title=pz playground
-description=workshop test
-tags=
-visibility=1
+id=3817301102
+title=Rust Remover
+description=Remove rust
+tags=Build 42;Multiplayer;QoL
+visibility=friendsOnly
