@@ -67,6 +67,12 @@ function RustRemover_Server.perform(playerObj, args)
 
     local rustRemovableQty = waterRemovableLiter / RustRemover.WATER_NEEDED_LITER
 
+    -- If absorbent is a clean rag, make it dirty
+    if absorbentItem:getFullType() == "Base.RippedSheets" then
+        playerObj:getInventory():DoRemoveItem(absorbentItem)
+        playerObj:getInventory():AddItem("Base.RippedSheetsDirty")
+    end
+
     -- Empty fluid containers
     cleangFluidContainer:removeFluid(cleaningFluidRemovableLiter)
     waterContainer:removeFluid(waterRemovableLiter)
