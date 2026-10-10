@@ -1,5 +1,8 @@
 RustRemover = RustRemover or {}
 
+RustRemover.CLEANING_FLUID_NEEDED_LITER = 1
+RustRemover.WATER_NEEDED_LITER = 10.0 
+
 RustRemover.MODULE = "RustRemover"
 RustRemover.COMMAND_REMOVE_RUST = "removeRust"
 RustRemover.MAX_DISTANCE = 5.0

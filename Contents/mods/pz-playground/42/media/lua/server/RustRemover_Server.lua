@@ -6,32 +6,8 @@ local function syncItem(item)
     if isServer() and sendItemStats and item then sendItemStats(item) end
 end
 
-local function getFluidToRemove(item, rust)
-    if not item then return 0.0 end
-    if ComponentType and ComponentType.FluidContainer and item.hasComponent and item:hasComponent(ComponentType.FluidContainer) then
-        local fluidContainer = item:getFluidContainer()
-        if not fluidContainer then return false end
-
-        local fluidLiterToRemove = math.min(rust * fluidContainer:getCapacity(), fluidContainer:getAmount())
-        return fluidLiterToRemove / fluidContainer:getCapacity()
-    end
-
-    return 0.0
-end
-
-local function emptyFluid(item, fluidToRemove)
-    if not item then return 0.0 end
-    if ComponentType and ComponentType.FluidContainer and item.hasComponent and item:hasComponent(ComponentType.FluidContainer) then
-        local fluidContainer = item:getFluidContainer()
-        if not fluidContainer then return false end
-        
-        fluidContainer:removeFluid(fluidToRemove * fluidContainer:getCapacity())
-
-        syncItem(item)
-        return true
-    end
-
-    return false
+local function isFluidContainer(item)
+    return ComponentType and ComponentType.FluidContainer and item.hasComponent and item:hasComponent(ComponentType.FluidContainer)
 end
 
 function RustRemover_Server.perform(playerObj, args)
@@ -66,15 +42,45 @@ function RustRemover_Server.perform(playerObj, args)
         return false
     end
 
-    local cleaningFluidToRemove = getFluidToRemove(cleaningFluidContainerItem, rust)
-    local waterToRemove = getFluidToRemove(waterContainerItem, rust)
-    local qtyToRemove = math.min(cleaningFluidToRemove, waterToRemove)
+    if not isFluidContainer(cleaningFluidContainerItem) or not isFluidContainer(waterContainerItem) then return false end
+    local cleangFluidContainer = cleaningFluidContainerItem:getFluidContainer()
+    local waterContainer = waterContainerItem:getFluidContainer()
 
-    if not emptyFluid(cleaningFluidContainerItem, qtyToRemove) then return false end
-    if not emptyFluid(waterContainerItem, qtyToRemove) then return false end
+    local cleaningFluidRemovableLiter = 0.0
+    local cleaningFluidNeededLiter = rust * RustRemover.CLEANING_FLUID_NEEDED_LITER
+    if cleangFluidContainer:getAmount() < cleaningFluidNeededLiter then
+        cleaningFluidRemovableLiter = cleangFluidContainer:getAmount()
+    else
+        cleaningFluidRemovableLiter = cleaningFluidNeededLiter
+    end
+
+    local waterRemovableLiter = 0.0
+    local waterNeededLiter = rust * RustRemover.WATER_NEEDED_LITER
+    if waterContainer:getAmount() < waterNeededLiter then
+        waterRemovableLiter = waterContainer:getAmount()
+    else
+        waterRemovableLiter = waterNeededLiter
+    end
+
+    local cleaningFluidQtyRemovable = cleaningFluidRemovableLiter / RustRemover.CLEANING_FLUID_NEEDED_LITER
+    local waterQtyRemovable = waterRemovableLiter / RustRemover.WATER_NEEDED_LITER
+
+    if cleaningFluidQtyRemovable ~= waterQtyRemovable then
+        local qtyRemovable = math.min(cleaningFluidQtyRemovable, waterQtyRemovable)
+        cleaningFluidRemovableLiter = math.min(qtyRemovable * RustRemover.CLEANING_FLUID_NEEDED_LITER, cleangFluidContainer:getAmount())
+        waterRemovableLiter = math.min(qtyRemovable * RustRemover.WATER_NEEDED_LITER, waterContainer:getAmount())
+    end
+
+    local rustRemovableQty = waterRemovableLiter / RustRemover.WATER_NEEDED_LITER
+
+
+    cleangFluidContainer:removeFluid(cleaningFluidRemovableLiter)
+    waterContainer:removeFluid(waterRemovableLiter)
+    syncItem(cleangFluidContainer)
+    syncItem(waterContainer)
 
     local oldRust = rust
-    vehicle:setRust(vehicle:getRust() - qtyToRemove)
+    vehicle:setRust(vehicle:getRust() - rustRemovableQty)
     if vehicle:getRust() <= RustRemover.FLOAT_EPSILON then vehicle:setRust(0) end
     vehicle:transmitRust()
 
