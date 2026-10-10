@@ -8,21 +8,13 @@ RustRemover.COMMAND_REMOVE_RUST = "removeRust"
 RustRemover.MAX_DISTANCE = 5.0
 RustRemover.FLOAT_EPSILON = 0.00001
 
-RustRemover.CLEANING_FLUID_TYPES = {
-    "CleaningLiquid",
-    "Bleach",
+RustRemover.CLEANING_FLUIDS = {
+    Fluid.CleaningLiquid,
+    Fluid.Bleach
 }
 
-RustRemover.CLEANING_FLUID_ITEM_TYPES = {
-    "Base.CleaningLiquid2",
-    "Base.Bleach",
-}
-
-RustRemover.BUCKET_TYPES = {
-    "Base.Bucket",
-    "Base.BucketEmpty",
-    "Base.BucketWater",
-    "Base.BucketWaterDebug",
+RustRemover.WATER_FLUIDS = {
+    Fluid.Water
 }
 
 RustRemover.CLOTH_TYPES = {
@@ -37,56 +29,21 @@ local function getFluidContainerSafe(item)
     return item:getFluidContainer()
 end
 
-function RustRemover.isFluidContainerNotEmpty(item)
-    if not item then return false end
-    local fluidContainer = getFluidContainerSafe(item)
-    if fluidContainer then
-        return fluidContainer:getAmount() > 0.0
-    end
-    return false
-end
-
-function RustRemover.isWaterBucket(item)
-    if not item then return false end
-    local itemType = item:getFullType()
-    local valid = false
-    for _, wantedType in ipairs(RustRemover.BUCKET_TYPES) do
-        if itemType == wantedType then valid = true break end
-    end
-    if not valid then return false end
-
-    local fluidContainer = getFluidContainerSafe(item)
-    if fluidContainer then
-        local primaryFluid = fluidContainer:getPrimaryFluid()
-        if not primaryFluid then return false end
-
-        -- Only clean water is accepted.
-        if primaryFluid:getFluidTypeString() ~= "Water" then return false end
-        if fluidContainer.isTainted and fluidContainer:isTainted() then return false end
-
-        return RustRemover.isFluidContainerNotEmpty(item)
-    end
-
-    return false
-end
-
-function RustRemover.isCleaningFluidNotEmpty(item)
-    if not item then return false end
-
-    if not RustRemover.isItemInTypes(item, RustRemover.CLEANING_FLUID_ITEM_TYPES) then return false end
-
+local function isFluidAndNotEmptyAndPureAndNotTainted(item, fluid)
     local fluidContainer = getFluidContainerSafe(item)
     if not fluidContainer then return false end
 
-    local primaryFluid = fluidContainer:getPrimaryFluid()
-    if not primaryFluid then return false end
-    if not RustRemover.isCleaningFluid(primaryFluid:getFluidTypeString()) then return false end
-    if fluidContainer.isMixture and fluidContainer:isMixture() then return false end
-
-    return not fluidContainer:isEmpty()
+    return RustRemover.isFluidAndNotEmptyAndPure(item, fluid) and not fluidContainer:isTainted()
 end
 
-function RustRemover.isAbsorbent(item)
+local function isFluidAndNotEmptyAndPure(item, fluid)
+    local fluidContainer = getFluidContainerSafe(item)
+    if not fluidContainer then return false end
+
+    return not fluidContainer:isEmpty() and fluidContainer:isPureFluid(fluid)
+end
+
+local function isAbsorbent(item)
     if not item then return false end
     local itemType = item:getFullType()
     for _, wantedType in ipairs(RustRemover.CLOTH_TYPES) do
@@ -95,24 +52,15 @@ function RustRemover.isAbsorbent(item)
     return false
 end
 
-function RustRemover.isCleaningFluid(fluid)
-    if not fluid then return false end
-    for _, wantedType in ipairs(RustRemover.CLEANING_FLUID_TYPES) do
-        if fluid == wantedType then return true end
+local function findFirstFluidContainerItem(inventory, predicate, fluids)
+    for _, fluid in ipairs(fluids) do
+        local fluidContainerItem = inventory:getFirstFluidContainer(fluid:getFluidTypeString())
+        if fluidContainerItem and predicate(fluidContainerItem, fluid) then return fluidContainerItem end
     end
-    return false
+    return nil
 end
 
-function RustRemover.isItemInTypes(item, types)
-    if not item then return false end
-    local itemType = item:getFullType()
-    for _, wantedType in ipairs(types) do
-        if itemType == wantedType then return true end
-    end
-    return false
-end
-
-local function findFirst(inventory, types, predicate)
+local function findFirstAbsorbentItem(inventory, predicate, types)
     for _, fullType in ipairs(types) do
         local items = inventory:getAllTypeRecurse(fullType)
         if items then
@@ -128,9 +76,10 @@ end
 function RustRemover.findSupplies(playerObj)
     if not playerObj or not playerObj:getInventory() then return nil,nil,nil end
     local inventory = playerObj:getInventory()
-    local cleaningFluidContainerItem = findFirst(inventory, RustRemover.CLEANING_FLUID_ITEM_TYPES, RustRemover.isCleaningFluidNotEmpty)
-    local waterContainerItem = findFirst(inventory, RustRemover.BUCKET_TYPES, RustRemover.isWaterBucket)
-    local absorbentItem = findFirst(inventory, RustRemover.CLOTH_TYPES, RustRemover.isAbsorbent)
+    local cleaningFluidContainerItem = findFirstFluidContainerItem(inventory, isFluidAndNotEmptyAndPure, RustRemover.CLEANING_FLUIDS)
+    local waterContainerItem = findFirstFluidContainerItem(inventory, isFluidAndNotEmptyAndPureAndNotTainted, RustRemover.WATER_FLUIDS)
+    local absorbentItem = findFirstAbsorbentItem(inventory, isAbsorbent, RustRemover.CLOTH_TYPES)
+
     return cleaningFluidContainerItem, waterContainerItem, absorbentItem
 end
 
