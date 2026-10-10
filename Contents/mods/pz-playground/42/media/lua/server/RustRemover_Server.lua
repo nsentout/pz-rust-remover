@@ -43,14 +43,7 @@ function RustRemover_Server.perform(playerObj, args)
 
     local cleaningFluidContainerItem, waterContainerItem, absorbentItem = RustRemover.findSupplies(playerObj)
     if not cleaningFluidContainerItem or not waterContainerItem or not absorbentItem then
-        print("[RustRemover] rejected: missing/fullness requirement failed")
-        return false
-    end
-
-    if not RustRemover.isCleaningFluidNotEmpty(cleaningFluidContainerItem)
-        or not RustRemover.isWaterBucket(waterContainerItem)
-        or not RustRemover.isAbsorbent(absorbentItem) then
-        print("[RustRemover] rejected: supplies changed before completion")
+        print("[RustRemover] rejected: missing ingredient")
         return false
     end
 
