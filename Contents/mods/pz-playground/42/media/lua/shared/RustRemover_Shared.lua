@@ -29,18 +29,18 @@ local function getFluidContainerSafe(item)
     return item:getFluidContainer()
 end
 
-local function isFluidAndNotEmptyAndPureAndNotTainted(item, fluid)
-    local fluidContainer = getFluidContainerSafe(item)
-    if not fluidContainer then return false end
-
-    return RustRemover.isFluidAndNotEmptyAndPure(item, fluid) and not fluidContainer:isTainted()
-end
-
 local function isFluidAndNotEmptyAndPure(item, fluid)
     local fluidContainer = getFluidContainerSafe(item)
     if not fluidContainer then return false end
 
     return not fluidContainer:isEmpty() and fluidContainer:isPureFluid(fluid)
+end
+
+local function isFluidAndNotEmptyAndPureAndNotTainted(item, fluid)
+    local fluidContainer = getFluidContainerSafe(item)
+    if not fluidContainer then return false end
+
+    return isFluidAndNotEmptyAndPure(item, fluid) and not fluidContainer:isTainted()
 end
 
 local function isAbsorbent(item)
