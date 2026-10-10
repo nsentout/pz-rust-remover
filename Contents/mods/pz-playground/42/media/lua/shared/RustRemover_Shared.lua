@@ -34,37 +34,34 @@ local function getFluidContainerSafe(item)
     return item:getFluidContainer()
 end
 
-function RustRemover.isItemNotEmpty(item)
+function RustRemover.isFluidContainerNotEmpty(item)
     if not item then return false end
-    local fluid = getFluidContainerSafe(item)
-    if fluid then
-        return fluid:getAmount() > 0.0
-    end
-    if item.IsDrainable and item:IsDrainable() and item.getUsedDelta then
-        return item:getUsedDelta() > 0.0
+    local fluidContainer = getFluidContainerSafe(item)
+    if fluidContainer then
+        return fluidContainer:getAmount() > 0.0
     end
     return false
 end
 
 function RustRemover.isWaterBucket(item)
     if not item then return false end
-    local ft = item:getFullType()
+    local itemType = item:getFullType()
     local valid = false
-    for _, wanted in ipairs(RustRemover.BUCKET_TYPES) do
-        if ft == wanted then valid = true break end
+    for _, wantedType in ipairs(RustRemover.BUCKET_TYPES) do
+        if itemType == wantedType then valid = true break end
     end
     if not valid then return false end
 
-    local fluid = getFluidContainerSafe(item)
-    if fluid then
-        local primary = fluid:getPrimaryFluid()
-        if not primary then return false end
+    local fluidContainer = getFluidContainerSafe(item)
+    if fluidContainer then
+        local primaryFluid = fluidContainer:getPrimaryFluid()
+        if not primaryFluid then return false end
 
         -- Only clean water is accepted.
-        if primary:getFluidTypeString() ~= "Water" then return false end
-        if fluid.isTainted and fluid:isTainted() then return false end
+        if primaryFluid:getFluidTypeString() ~= "Water" then return false end
+        if fluidContainer.isTainted and fluidContainer:isTainted() then return false end
 
-        return RustRemover.isItemNotEmpty(item)
+        return RustRemover.isFluidContainerNotEmpty(item)
     end
 
     return false
@@ -78,43 +75,43 @@ function RustRemover.isCleaningFluidNotEmpty(item)
     local fluidContainer = getFluidContainerSafe(item)
     if not fluidContainer then return false end
 
-    local fluid = fluidContainer:getPrimaryFluid()
-    if not fluid then return false end
-    if not RustRemover.isCleaningFluid(fluid:getFluidTypeString()) then return false end
+    local primaryFluid = fluidContainer:getPrimaryFluid()
+    if not primaryFluid then return false end
+    if not RustRemover.isCleaningFluid(primaryFluid:getFluidTypeString()) then return false end
     if fluidContainer.isMixture and fluidContainer:isMixture() then return false end
 
     return not fluidContainer:isEmpty()
 end
 
-function RustRemover.isCleaningCloth(item)
+function RustRemover.isAbsorbent(item)
     if not item then return false end
-    local ft = item:getFullType()
-    for _, wanted in ipairs(RustRemover.CLOTH_TYPES) do
-        if ft == wanted then return true end
+    local itemType = item:getFullType()
+    for _, wantedType in ipairs(RustRemover.CLOTH_TYPES) do
+        if itemType == wantedType then return true end
     end
     return false
 end
 
 function RustRemover.isCleaningFluid(fluid)
     if not fluid then return false end
-    for _, wanted in ipairs(RustRemover.CLEANING_FLUID_TYPES) do
-        if fluid == wanted then return true end
+    for _, wantedType in ipairs(RustRemover.CLEANING_FLUID_TYPES) do
+        if fluid == wantedType then return true end
     end
     return false
 end
 
 function RustRemover.isItemInTypes(item, types)
     if not item then return false end
-    local type = item:getFullType()
-    for _, wanted in ipairs(types) do
-        if type == wanted then return true end
+    local itemType = item:getFullType()
+    for _, wantedType in ipairs(types) do
+        if itemType == wantedType then return true end
     end
     return false
 end
 
-local function findFirst(inv, types, predicate)
+local function findFirst(inventoy, types, predicate)
     for _, fullType in ipairs(types) do
-        local items = inv:getAllTypeRecurse(fullType)
+        local items = inventoy:getAllTypeRecurse(fullType)
         if items then
             for i = 0, items:size() - 1 do
                 local item = items:get(i)
@@ -127,10 +124,10 @@ end
 
 function RustRemover.findSupplies(playerObj)
     if not playerObj or not playerObj:getInventory() then return nil,nil,nil end
-    local inv = playerObj:getInventory()
-    local cleaningFluidContainerItem = findFirst(inv, RustRemover.CLEANING_FLUID_ITEM_TYPES, RustRemover.isCleaningFluidNotEmpty)
-    local waterContainerItem = findFirst(inv, RustRemover.BUCKET_TYPES, RustRemover.isWaterBucket)
-    local absorbentItem = findFirst(inv, RustRemover.CLOTH_TYPES, RustRemover.isCleaningCloth)
+    local inventoy = playerObj:getInventory()
+    local cleaningFluidContainerItem = findFirst(inventoy, RustRemover.CLEANING_FLUID_ITEM_TYPES, RustRemover.isCleaningFluidNotEmpty)
+    local waterContainerItem = findFirst(inventoy, RustRemover.BUCKET_TYPES, RustRemover.isWaterBucket)
+    local absorbentItem = findFirst(inventoy, RustRemover.CLOTH_TYPES, RustRemover.isAbsorbent)
     return cleaningFluidContainerItem, waterContainerItem, absorbentItem
 end
 
