@@ -51,13 +51,13 @@ local function tooltip(hasFluid, hasBucket, hasCloth)
     t:initialise()
     t:setVisible(false)
     t.maxLineWidth = 1000
-    t.description = getText("Tooltip_JLJ_RemoveRust")
+    t.description = getText("Tooltip_RR_RemoveRust")
     return t
 end
 
 function RustRemover_Client.startAction(playerObj, vehicle)
     if not RustRemover.isNearVehicle(playerObj, vehicle) then
-        playerObj:Say(getText("IGUI_JLJ_PlayerText_TooFarFromVehicle"))
+        playerObj:Say(getText("IGUI_RR_PlayerText_TooFarFromVehicle"))
         return
     end
     if RustRemover.hasSupplies(playerObj) then
@@ -74,7 +74,7 @@ function RustRemover_Client.onFillWorldObjectContextMenu(playerNum, context, wor
     if not vehicle or not vehicle:getRust() or vehicle:getRust() <= RustRemover.FLOAT_EPSILON then return end
 
     local cleaningFluidContainerItem, waterContainerItem, absorbentItem = RustRemover.findSupplies(playerObj)
-    local option = context:addOption(getText("ContextMenu_JLJ_RemoveRust"), playerObj, RustRemover_Client.startAction, vehicle)
+    local option = context:addOption(getText("ContextMenu_RR_RemoveRust"), playerObj, RustRemover_Client.startAction, vehicle)
     option.toolTip = tooltip(cleaningFluidContainerItem ~= nil, waterContainerItem ~= nil, cloth ~= nil)
     if not (cleaningFluidContainerItem and waterContainerItem and absorbentItem) then option.notAvailable = true end
 end
