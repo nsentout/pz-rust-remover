@@ -112,9 +112,9 @@ function RustRemover.isItemInTypes(item, types)
     return false
 end
 
-local function findFirst(inventoy, types, predicate)
+local function findFirst(inventory, types, predicate)
     for _, fullType in ipairs(types) do
-        local items = inventoy:getAllTypeRecurse(fullType)
+        local items = inventory:getAllTypeRecurse(fullType)
         if items then
             for i = 0, items:size() - 1 do
                 local item = items:get(i)
@@ -127,10 +127,10 @@ end
 
 function RustRemover.findSupplies(playerObj)
     if not playerObj or not playerObj:getInventory() then return nil,nil,nil end
-    local inventoy = playerObj:getInventory()
-    local cleaningFluidContainerItem = findFirst(inventoy, RustRemover.CLEANING_FLUID_ITEM_TYPES, RustRemover.isCleaningFluidNotEmpty)
-    local waterContainerItem = findFirst(inventoy, RustRemover.BUCKET_TYPES, RustRemover.isWaterBucket)
-    local absorbentItem = findFirst(inventoy, RustRemover.CLOTH_TYPES, RustRemover.isAbsorbent)
+    local inventory = playerObj:getInventory()
+    local cleaningFluidContainerItem = findFirst(inventory, RustRemover.CLEANING_FLUID_ITEM_TYPES, RustRemover.isCleaningFluidNotEmpty)
+    local waterContainerItem = findFirst(inventory, RustRemover.BUCKET_TYPES, RustRemover.isWaterBucket)
+    local absorbentItem = findFirst(inventory, RustRemover.CLOTH_TYPES, RustRemover.isAbsorbent)
     return cleaningFluidContainerItem, waterContainerItem, absorbentItem
 end
 
