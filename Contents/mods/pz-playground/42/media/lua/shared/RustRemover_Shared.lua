@@ -6,7 +6,7 @@ RustRemover.FLOAT_EPSILON = 0.00001
 
 RustRemover.CLEANING_FLUID_NEEDED_LITER = 1
 RustRemover.WATER_NEEDED_LITER = 4.0 
-RustRemover.MAX_DISTANCE = 5.0
+RustRemover.MAX_DISTANCE_FROM_VEHICLE = 5.0
 
 RustRemover.CLEANING_FLUIDS = {
     Fluid.CleaningLiquid,
@@ -22,22 +22,17 @@ RustRemover.CLOTH_TYPES = {
     "Base.Sponge",
 }
 
-local function getFluidContainerSafe(item)
-    if not item then return nil end
-    if not ComponentType or not ComponentType.FluidContainer then return nil end
-    if not item.hasComponent or not item:hasComponent(ComponentType.FluidContainer) then return nil end
-    return item:getFluidContainer()
-end
-
 local function isFluidAndNotEmptyAndPure(item, fluid)
-    local fluidContainer = getFluidContainerSafe(item)
+    if not item then return false end
+    local fluidContainer = item:getFluidContainer()
     if not fluidContainer then return false end
 
     return not fluidContainer:isEmpty() and fluidContainer:isPureFluid(fluid)
 end
 
 local function isFluidAndNotEmptyAndPureAndNotTainted(item, fluid)
-    local fluidContainer = getFluidContainerSafe(item)
+    if not item then return false end
+    local fluidContainer = item:getFluidContainer()
     if not fluidContainer then return false end
 
     return isFluidAndNotEmptyAndPure(item, fluid) and not fluidContainer:isTainted()
@@ -100,5 +95,5 @@ function RustRemover.isNearVehicle(playerObj, vehicle)
     if not playerObj or not vehicle then return false end
     local dx = playerObj:getX() - vehicle:getX()
     local dy = playerObj:getY() - vehicle:getY()
-    return dx*dx + dy*dy <= RustRemover.MAX_DISTANCE * RustRemover.MAX_DISTANCE
+    return dx*dx + dy*dy <= RustRemover.MAX_DISTANCE_FROM_VEHICLE * RustRemover.MAX_DISTANCE_FROM_VEHICLE
 end
