@@ -46,13 +46,30 @@ end
 
 RustRemover_Client = RustRemover_Client or {}
 
-local function tooltip(hasFluid, hasBucket, hasCloth)
-    local t = ISToolTip:new()
-    t:initialise()
-    t:setVisible(false)
-    t.maxLineWidth = 1000
-    t.description = getText("Tooltip_RR_RemoveRust")
-    return t
+local function tooltip(hasCleaningFluid, hasWater, hasAbsorbent)
+    local tooltip = ISToolTip:new()
+    tooltip:initialise()
+    tooltip:setVisible(false)
+    tooltip.maxLineWidth = 1000
+    tooltip.description = getText("Tooltip_RR_RemoveRust")
+
+    if not hasCleaningFluid or not hasWater or not hasAbsorbent then
+        tooltip.description = tooltip.description .. " <LINE>"
+    end
+
+    if not hasCleaningFluid then
+       tooltip.description = tooltip.description .. " <LINE>" .. getText("Tooltip_RR_MissingCleaningLiquid")
+    end
+
+    if not hasWater then
+       tooltip.description = tooltip.description .. " <LINE>" .. getText("Tooltip_RR_MissingWater")
+    end
+
+    if not hasAbsorbent then
+       tooltip.description = tooltip.description .. " <LINE>" .. getText("Tooltip_RR_MissingAbsorbent")
+    end
+
+    return tooltip
 end
 
 function RustRemover_Client.startAction(playerObj, vehicle)
