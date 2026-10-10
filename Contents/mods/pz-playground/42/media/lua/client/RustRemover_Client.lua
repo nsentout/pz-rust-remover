@@ -7,7 +7,7 @@ ISRemoveVehicleRustAction = ISBaseTimedAction:derive("ISRemoveVehicleRustAction"
 
 function ISRemoveVehicleRustAction:isValid()
     return self.vehicle
-        and self.vehicle:getRust() > 0.0001
+        and self.vehicle:getRust() > RustRemover.FLOAT_EPSILON
         and RustRemover.isNearVehicle(self.character, self.vehicle)
         and RustRemover.hasSupplies(self.character)
 end

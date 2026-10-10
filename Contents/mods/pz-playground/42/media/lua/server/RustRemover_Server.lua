@@ -43,7 +43,7 @@ function RustRemover_Server.perform(playerObj, args)
     end
 
     local rust = vehicle:getRust()
-    if not rust or rust <= 0.0001 then
+    if not rust or rust <= RustRemover.FLOAT_EPSILON then
         print("[RustRemover] rejected: no rust")
         return false
     end
