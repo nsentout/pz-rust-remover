@@ -4,8 +4,8 @@ RustRemover.MODULE = "RustRemover"
 RustRemover.COMMAND_REMOVE_RUST = "removeRust"
 RustRemover.FLOAT_EPSILON = 0.00001
 
-RustRemover.CLEANING_FLUID_NEEDED_LITER = 1
-RustRemover.WATER_NEEDED_LITER = 4.0 
+RustRemover.CLEANING_FLUID_NEEDED_LITER = 0.5
+RustRemover.WATER_NEEDED_LITER = 10.0 
 RustRemover.MAX_DISTANCE_FROM_VEHICLE = 5.0
 
 RustRemover.CLEANING_FLUIDS = {
