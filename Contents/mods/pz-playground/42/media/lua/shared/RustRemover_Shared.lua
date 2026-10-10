@@ -5,12 +5,12 @@ RustRemover.COMMAND_REMOVE_RUST = "removeRust"
 RustRemover.MAX_DISTANCE = 5.0
 RustRemover.FLOAT_EPSILON = 0.00001
 
-RustRemover.CLEANING_LIQUID_FLUID_TYPES = {
+RustRemover.CLEANING_FLUID_TYPES = {
     "CleaningLiquid",
     "Bleach",
 }
 
-RustRemover.CLEANING_LIQUID_ITEM_TYPES = {
+RustRemover.CLEANING_FLUID_ITEM_TYPES = {
     "Base.CleaningLiquid2",
     "Base.Bleach",
 }
@@ -70,10 +70,10 @@ function RustRemover.isWaterBucket(item)
     return false
 end
 
-function RustRemover.isCleaningLiquidNotEmpty(item)
+function RustRemover.isCleaningFluidNotEmpty(item)
     if not item then return false end
 
-    if not RustRemover.isItemInTypes(item, RustRemover.CLEANING_LIQUID_ITEM_TYPES) then return false end
+    if not RustRemover.isItemInTypes(item, RustRemover.CLEANING_FLUID_ITEM_TYPES) then return false end
 
     local fluidContainer = getFluidContainerSafe(item)
     if not fluidContainer then return false end
@@ -97,7 +97,7 @@ end
 
 function RustRemover.isCleaningFluid(fluid)
     if not fluid then return false end
-    for _, wanted in ipairs(RustRemover.CLEANING_LIQUID_FLUID_TYPES) do
+    for _, wanted in ipairs(RustRemover.CLEANING_FLUID_TYPES) do
         if fluid == wanted then return true end
     end
     return false
@@ -128,15 +128,15 @@ end
 function RustRemover.findSupplies(playerObj)
     if not playerObj or not playerObj:getInventory() then return nil,nil,nil end
     local inv = playerObj:getInventory()
-    local cleaningLiquid = findFirst(inv, RustRemover.CLEANING_LIQUID_ITEM_TYPES, RustRemover.isCleaningLiquidNotEmpty)
-    local waterContainer = findFirst(inv, RustRemover.BUCKET_TYPES, RustRemover.isWaterBucket)
-    local cloth = findFirst(inv, RustRemover.CLOTH_TYPES, RustRemover.isCleaningCloth)
-    return cleaningLiquid, waterContainer, cloth
+    local cleaningFluidContainerItem = findFirst(inv, RustRemover.CLEANING_FLUID_ITEM_TYPES, RustRemover.isCleaningFluidNotEmpty)
+    local waterContainerItem = findFirst(inv, RustRemover.BUCKET_TYPES, RustRemover.isWaterBucket)
+    local absorbentItem = findFirst(inv, RustRemover.CLOTH_TYPES, RustRemover.isCleaningCloth)
+    return cleaningFluidContainerItem, waterContainerItem, absorbentItem
 end
 
 function RustRemover.hasSupplies(playerObj)
-    local liquid,bucket,cloth = RustRemover.findSupplies(playerObj)
-    return liquid ~= nil and bucket ~= nil and cloth ~= nil
+    local cleaningFluidContainerItem, waterContainerItem, absorbentItem = RustRemover.findSupplies(playerObj)
+    return cleaningFluidContainerItem ~= nil and waterContainerItem ~= nil and absorbentItem ~= nil
 end
 
 function RustRemover.isNearVehicle(playerObj, vehicle)

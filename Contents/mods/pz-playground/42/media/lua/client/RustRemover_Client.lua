@@ -46,7 +46,7 @@ end
 
 RustRemover_Client = RustRemover_Client or {}
 
-local function tooltip(hasLiquid, hasBucket, hasCloth)
+local function tooltip(hasFluid, hasBucket, hasCloth)
     local t = ISToolTip:new()
     t:initialise()
     t:setVisible(false)
@@ -73,10 +73,10 @@ function RustRemover_Client.onFillWorldObjectContextMenu(playerNum, context, wor
     local vehicle = IsoObjectPicker.Instance:PickVehicle(getMouseXScaled(), getMouseYScaled())
     if not vehicle or not vehicle:getRust() or vehicle:getRust() <= 0.0001 then return end
 
-    local liquid,bucket,cloth = RustRemover.findSupplies(playerObj)
+    local cleaningFluidContainerItem, waterContainerItem, absorbentItem = RustRemover.findSupplies(playerObj)
     local option = context:addOption(getText("ContextMenu_JLJ_RemoveRust"), playerObj, RustRemover_Client.startAction, vehicle)
-    option.toolTip = tooltip(liquid ~= nil, bucket ~= nil, cloth ~= nil)
-    if not (liquid and bucket and cloth) then option.notAvailable = true end
+    option.toolTip = tooltip(cleaningFluidContainerItem ~= nil, waterContainerItem ~= nil, absorbentItem ~= nil)
+    if not (cleaningFluidContainerItem and waterContainerItem and absorbentItem) then option.notAvailable = true end
 end
 
 Events.OnFillWorldObjectContextMenu.Add(RustRemover_Client.onFillWorldObjectContextMenu)
