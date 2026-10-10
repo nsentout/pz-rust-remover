@@ -6,20 +6,20 @@ local function syncItem(item)
     if isServer() and sendItemStats and item then sendItemStats(item) end
 end
 
-local function getLiquidToRemove(item, rust)
+local function getFluidToRemove(item, rust)
     if not item then return 0.0 end
     if ComponentType and ComponentType.FluidContainer and item.hasComponent and item:hasComponent(ComponentType.FluidContainer) then
         local fluid = item:getFluidContainer()
         if not fluid then return false end
 
-        local liquidLiterToRemove = math.min(rust * fluid:getCapacity(), fluid:getAmount())
-        return liquidLiterToRemove / fluid:getCapacity()
+        local fluidLiterToRemove = math.min(rust * fluid:getCapacity(), fluid:getAmount())
+        return fluidLiterToRemove / fluid:getCapacity()
     end
 
     return 0.0
 end
 
-local function emptyLiquid(item, fluidToRemove)
+local function emptyFluid(item, fluidToRemove)
     if not item then return 0.0 end
     if ComponentType and ComponentType.FluidContainer and item.hasComponent and item:hasComponent(ComponentType.FluidContainer) then
         local fluid = item:getFluidContainer()
@@ -53,25 +53,25 @@ function RustRemover_Server.perform(playerObj, args)
         return false
     end
 
-    local cleaningLiquid,waterContainerItem,cloth = RustRemover.findSupplies(playerObj)
-    if not cleaningLiquid or not waterContainerItem or not cloth then
+    local cleaningFluidContainerItem, waterContainerItem, absorbentItem = RustRemover.findSupplies(playerObj)
+    if not cleaningFluidContainerItem or not waterContainerItem or not absorbentItem then
         print("[RustRemover] rejected: missing/fullness requirement failed")
         return false
     end
 
-    if not RustRemover.isCleaningLiquidNotEmpty(cleaningLiquid)
+    if not RustRemover.isCleaningFluidNotEmpty(cleaningFluidContainerItem)
         or not RustRemover.isWaterBucket(waterContainerItem)
-        or not RustRemover.isCleaningCloth(cloth) then
+        or not RustRemover.isCleaningCloth(absorbentItem) then
         print("[RustRemover] rejected: supplies changed before completion")
         return false
     end
 
-    local cleaningLiquidToRemove = getLiquidToRemove(cleaningLiquid, rust)
-    local waterToRemove = getLiquidToRemove(waterContainerItem, rust)
-    local qtyToRemove = math.min(cleaningLiquidToRemove, waterToRemove)
+    local cleaningFluidToRemove = getFluidToRemove(cleaningFluidContainerItem, rust)
+    local waterToRemove = getFluidToRemove(waterContainerItem, rust)
+    local qtyToRemove = math.min(cleaningFluidToRemove, waterToRemove)
 
-    if not emptyLiquid(cleaningLiquid, qtyToRemove) then return false end
-    if not emptyLiquid(waterContainerItem, qtyToRemove) then return false end
+    if not emptyFluid(cleaningFluidContainerItem, qtyToRemove) then return false end
+    if not emptyFluid(waterContainerItem, qtyToRemove) then return false end
 
     local oldRust = rust
     vehicle:setRust(vehicle:getRust() - qtyToRemove)
