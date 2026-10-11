@@ -3,12 +3,8 @@ require "TimedActions/ISTimedActionQueue"
 require "ISUI/ISToolTip"
 require "RustRemover_Shared"
 
-local function syncItem(item)
-    if isServer() and sendItemStats and item then sendItemStats(item) end
-end
-
 local function isFluidContainer(item)
-    return ComponentType and ComponentType.FluidContainer and item.hasComponent and item:hasComponent(ComponentType.FluidContainer)
+    return item and item:hasComponent(ComponentType.FluidContainer)
 end
 
 local function getRemovableLiter(fluidContainer, neededLiterForFullClean, rust)
@@ -81,8 +77,8 @@ local function removeRust(playerObj, args)
     -- Empty fluid containers
     cleangFluidContainer:removeFluid(cleaningFluidRemovableLiter)
     waterContainer:removeFluid(waterRemovableLiter)
-    syncItem(cleaningFluidContainerItem)
-    syncItem(waterContainerItem)
+    sendItemStats(cleaningFluidContainerItem)
+    sendItemStats(waterContainerItem)
 
     -- Remove rust
     local oldRust = rust
