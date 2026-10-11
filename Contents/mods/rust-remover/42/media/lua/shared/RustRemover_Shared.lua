@@ -2,6 +2,7 @@ RustRemover = RustRemover or {}
 
 RustRemover.CLEANING_FLUID_NEEDED_LITER = 0.5
 RustRemover.WATER_NEEDED_LITER = 5.0
+RustRemover.MAX_ACTION_DURATION_MS = 500
 RustRemover.MAX_DISTANCE_FROM_VEHICLE = 5.0
 
 RustRemover.FLOAT_EPSILON = 0.00001

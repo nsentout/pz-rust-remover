@@ -126,7 +126,7 @@ end
 function ISRemoveVehicleRustAction:new(character, vehicle)
     local o = ISBaseTimedAction.new(self, character)
     o.vehicle = vehicle
-    o.maxTime = 6000
+    o.maxTime = RustRemover.MAX_ACTION_DURATION_MS
     o.stopOnWalk = true
     o.stopOnRun = true
     o.stopOnAim = true
