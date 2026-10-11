@@ -1,48 +1,4 @@
-require "TimedActions/ISBaseTimedAction"
-require "TimedActions/ISTimedActionQueue"
-require "ISUI/ISToolTip"
 require "RustRemover_Shared"
-
-ISRemoveVehicleRustAction = ISBaseTimedAction:derive("ISRemoveVehicleRustAction")
-
-function ISRemoveVehicleRustAction:isValid()
-    return self.vehicle
-        and self.vehicle:getRust() > RustRemover.FLOAT_EPSILON
-        and RustRemover.isNearVehicle(self.character, self.vehicle)
-        and RustRemover.hasSupplies(self.character)
-end
-
-function ISRemoveVehicleRustAction:update()
-    self.character:faceThisObject(self.vehicle)
-end
-
-function ISRemoveVehicleRustAction:start()
-    self:setActionAnim("Loot")
-end
-
-function ISRemoveVehicleRustAction:stop()
-    ISBaseTimedAction.stop(self)
-end
-
-function ISRemoveVehicleRustAction:perform()
-    local args = { vehicle = self.vehicle:getId() }
-    if isClient() then
-        sendClientCommand(self.character, RustRemover.MODULE, RustRemover.COMMAND_REMOVE_RUST, args)
-    else
-        triggerEvent("OnClientCommand", RustRemover.MODULE, RustRemover.COMMAND_REMOVE_RUST, self.character, args)
-    end
-    ISBaseTimedAction.perform(self)
-end
-
-function ISRemoveVehicleRustAction:new(character, vehicle)
-    local o = ISBaseTimedAction.new(self, character)
-    o.vehicle = vehicle
-    o.maxTime = 600
-    o.stopOnWalk = true
-    o.stopOnRun = true
-    o.stopOnAim = true
-    return o
-end
 
 RustRemover_Client = RustRemover_Client or {}
 
