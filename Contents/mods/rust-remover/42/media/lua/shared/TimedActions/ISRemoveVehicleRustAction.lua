@@ -71,7 +71,11 @@ local function removeRust(playerObj, args)
     -- If absorbent is a clean rag, make it dirty
     if absorbentItem:getFullType() == "Base.RippedSheets" then
         playerObj:getInventory():DoRemoveItem(absorbentItem)
-        playerObj:getInventory():AddItem("Base.RippedSheetsDirty")
+        sendRemoveItemFromContainer(playerObj:getInventory(), absorbentItem);
+
+        local rippedSheetsDirtyItem = instanceItem("Base.RippedSheetsDirty");
+        playerObj:getInventory():AddItem(rippedSheetsDirtyItem)
+        sendAddItemToContainer(playerObj:getInventory(), rippedSheetsDirtyItem);
     end
 
     -- Empty fluid containers
