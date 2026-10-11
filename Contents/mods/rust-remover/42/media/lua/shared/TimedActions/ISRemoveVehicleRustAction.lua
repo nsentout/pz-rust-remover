@@ -77,8 +77,8 @@ local function removeRust(playerObj, args)
     -- Empty fluid containers
     cleangFluidContainer:removeFluid(cleaningFluidRemovableLiter)
     waterContainer:removeFluid(waterRemovableLiter)
-    syncItem(cleangFluidContainer)
-    syncItem(waterContainer)
+    syncItem(cleaningFluidContainerItem)
+    syncItem(waterContainerItem)
 
     -- Remove rust
     local oldRust = rust
