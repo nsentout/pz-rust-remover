@@ -1,5 +1,6 @@
 {
 	"Tooltip_RR_RemoveRust": "You need a clean rag or sponge, water and cleaning liquid or bleach.",
+	"Tooltip_RR_RustLevel": "Rust level: %1%%",
 	"Tooltip_RR_MissingCleaningLiquid": "You don't have any cleaning liquid or bleach.",
 	"Tooltip_RR_MissingWater": "You don't have any water.",
 	"Tooltip_RR_MissingAbsorbent": "You are missing a clean rag or sponge."
