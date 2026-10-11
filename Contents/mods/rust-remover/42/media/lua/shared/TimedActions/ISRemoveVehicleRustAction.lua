@@ -1,13 +1,10 @@
+require "TimedActions/ISBaseTimedAction"
+require "TimedActions/ISTimedActionQueue"
+require "ISUI/ISToolTip"
 require "RustRemover_Shared"
 
-RustRemover_Server = RustRemover_Server or {}
-
-local function syncItem(item)
-    if isServer() and sendItemStats and item then sendItemStats(item) end
-end
-
 local function isFluidContainer(item)
-    return ComponentType and ComponentType.FluidContainer and item.hasComponent and item:hasComponent(ComponentType.FluidContainer)
+    return item and item:hasComponent(ComponentType.FluidContainer)
 end
 
 local function getRemovableLiter(fluidContainer, neededLiterForFullClean, rust)
@@ -22,7 +19,7 @@ local function getRemovableLiter(fluidContainer, neededLiterForFullClean, rust)
     return removableLiter
 end
 
-function RustRemover_Server.perform(playerObj, args)
+local function removeRust(playerObj, args)
     if not playerObj or not args or not args.vehicle then return false end
     local vehicle = getVehicleById(tonumber(args.vehicle))
     if not vehicle then
@@ -70,14 +67,18 @@ function RustRemover_Server.perform(playerObj, args)
     -- If absorbent is a clean rag, make it dirty
     if absorbentItem:getFullType() == "Base.RippedSheets" then
         playerObj:getInventory():DoRemoveItem(absorbentItem)
-        playerObj:getInventory():AddItem("Base.RippedSheetsDirty")
+        sendRemoveItemFromContainer(playerObj:getInventory(), absorbentItem);
+
+        local rippedSheetsDirtyItem = instanceItem("Base.RippedSheetsDirty");
+        playerObj:getInventory():AddItem(rippedSheetsDirtyItem)
+        sendAddItemToContainer(playerObj:getInventory(), rippedSheetsDirtyItem);
     end
 
     -- Empty fluid containers
     cleangFluidContainer:removeFluid(cleaningFluidRemovableLiter)
     waterContainer:removeFluid(waterRemovableLiter)
-    syncItem(cleangFluidContainer)
-    syncItem(waterContainer)
+    sendItemStats(cleaningFluidContainerItem)
+    sendItemStats(waterContainerItem)
 
     -- Remove rust
     local oldRust = rust
@@ -92,11 +93,42 @@ function RustRemover_Server.perform(playerObj, args)
     return true
 end
 
-function RustRemover_Server.onClientCommand(module, command, playerObj, args)
-    if module == RustRemover.MODULE
-        and command == RustRemover.COMMAND_REMOVE_RUST then
-        RustRemover_Server.perform(playerObj, args or {})
-    end
+ISRemoveVehicleRustAction = ISBaseTimedAction:derive("ISRemoveVehicleRustAction")
+
+function ISRemoveVehicleRustAction:isValid()
+    return self.vehicle
+        and self.vehicle:getRust() > RustRemover.FLOAT_EPSILON
+        and RustRemover.isNearVehicle(self.character, self.vehicle)
+        and RustRemover.hasSupplies(self.character)
 end
 
-Events.OnClientCommand.Add(RustRemover_Server.onClientCommand)
+function ISRemoveVehicleRustAction:update()
+    self.character:faceThisObject(self.vehicle)
+end
+
+function ISRemoveVehicleRustAction:start()
+    self:setActionAnim("Loot")
+end
+
+function ISRemoveVehicleRustAction:stop()
+    ISBaseTimedAction.stop(self)
+end
+
+function ISRemoveVehicleRustAction:perform()
+    ISBaseTimedAction.perform(self)
+end
+
+function ISRemoveVehicleRustAction:complete()
+    local args = { vehicle = self.vehicle:getId() }
+    return removeRust(self.character, args)
+end
+
+function ISRemoveVehicleRustAction:new(character, vehicle)
+    local o = ISBaseTimedAction.new(self, character)
+    o.vehicle = vehicle
+    o.maxTime = RustRemover.MAX_ACTION_DURATION_MS
+    o.stopOnWalk = true
+    o.stopOnRun = true
+    o.stopOnAim = true
+    return o
+end
