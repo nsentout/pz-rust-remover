@@ -1,6 +1,40 @@
-version=1
+version=1.0.1
 id=3817301102
 title=Rust Remover
-description=Remove rust
-tags=Build 42;Multiplayer;QoL
-visibility=friendsOnly
+description=[b]Rust Remover[/b] is based on this mod : [url=https://steamcommunity.com/sharedfiles/filedetails/?id=3791487422]Vehicle Rust Cleaning B42 MP[/url]. Credits to its author.
+
+description=
+
+description=There were some limitations, and I wanted to get into modding, so I made my own.
+
+description=
+
+description=Feature :
+
+description=[list]
+
+description=[*] Add a contextual menu on rusty vehicles to remove the rust
+
+description=    [list][*] You need a clean ripped sheet or sponge, clean water, and cleaning liquid or bleach
+
+description=    [*] Works with any container of water and cleaning liquid/bleach
+
+description=    [*] Containers don't have to be full
+
+description=    [/list]
+
+description=[/list]
+
+description=
+
+description=5L of water and 0.5L of cleaning liquid/bleach are needed to clean a 100% rusty vehicle.
+
+description=
+
+description=Works in multiplayer.
+
+description=
+
+description=With french and spanish translation.
+tags=Build 42;Multiplayer;Vehicles;QoL
+visibility=public
