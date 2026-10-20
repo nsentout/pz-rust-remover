@@ -1,0 +1,7 @@
+{
+	"Tooltip_RR_RemoveRust": "Necesitas un retal de tela limpio o una esponja, agua y líquido limpiador o lejía.",
+	"Tooltip_RR_RustLevel": "Nivel de óxido: %1%%",
+	"Tooltip_RR_MissingCleaningLiquid": "No tienes líquido limpiador o lejía.",
+	"Tooltip_RR_MissingWater": "No tienes agua.",
+	"Tooltip_RR_MissingAbsorbent": "No tienes un retal de tela limpio o una esponja."
+}
